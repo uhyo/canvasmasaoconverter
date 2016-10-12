@@ -5,10 +5,15 @@
     var a=apps[i];
     if(a.tagName==="APPLET"){
       //masao!
-      if(/^MasaoConstruction$/i.test(a.code)){
-        mode="MasaoConstruction";
+      var code=a.getAttribute('code');
+      if(/^MasaoConstruction$/i.test(code)){
+        if(/\.zip$/.test(a.getAttribute('archive'))){
+          mode="2.8";
+        }else{
+          mode="FX";
+        }
         break;
-      }else if(/^MasaoKani2?$/.test(a.code)){
+      }else if(/^MasaoKani2?$/.test(code)){
         mode="MasaoKani";
         break;
       }
@@ -16,7 +21,7 @@
       var cl=a.querySelector('param[name="classid"]');
       if(cl && /^java:MasaoConstruction\.class$/i.test(cl.value)){
         //masao!?
-        console.warn("Possible java Masao detected. Canvas Masao does not converts Java Masao represented as <object/>.")
+        console.warn("Possible java Masao detected. Canvas Masao does not convert Java Masao represented as <object/>.")
       }
     }
   }
@@ -28,10 +33,14 @@
   }
   console.log("Canvas Masao Converter: converting Masao");
   var s=document.createElement("script");
-  s.src="http://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao.js";
+  if(mode==="2.8"){
+    s.src="http://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao_v28.js";
+  }else{
+    s.src="http://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao.js";
+  }
   s.addEventListener("load",function(e){
     var s2=document.createElement("script");
-    if(mode==="MasaoConstruction"){
+    if(mode!=="MasaoKani"){
       s2.textContent="CanvasMasao.Game.replaceAll();";
       (document.head||document.body).appendChild(s2);
     }else{
