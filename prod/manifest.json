@@ -2,7 +2,7 @@
   "manifest_version":2,
   "name":"Canvas Masao Converter",
   "description":"Converts Java Masao into Canvas Masao.",
-  "version":"1.2",
+  "version":"1.2.1",
   "author":"uhyo",
 
   "icons":{

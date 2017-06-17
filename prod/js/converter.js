@@ -39,8 +39,6 @@
           handleObject(n);
         }else if(n.tagName === "SCRIPT"){
           handleScript(n);
-        }else if(n.tagName === "BODY"){
-          console.log('BODDDD');
         }
       }
     }
