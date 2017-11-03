@@ -63,7 +63,7 @@
       // Not masao!
       return;
     }
-    convertMasaoAt(mode, a);
+    convertMasaoAt(mode, a, code);
   }
   function handleObject(a){
     //handle <object>.
@@ -85,7 +85,7 @@
       // console.log('stopping');
     }
   }
-  function convertMasaoAt(mode, a){
+  function convertMasaoAt(mode, a, code){
     // aにはIDをつけてあげる
     if (stop_flg){
       return;
@@ -107,6 +107,7 @@
     targets.push({
       mode,
       id: a.id,
+      code,
     });
 
     // せっかちなひとのためのfake
@@ -157,9 +158,9 @@
     stop_flg = true;
     console.info("Canvas Masao Converter: converting Masao");
     // 変換スクリプトをひとつずつアレする
-    let scriptText = `(()=>{
+    let scriptText = String.raw`(()=>{
 'use strict';
-function conv(id, options){
+function conv(id, code, options){
   const app = document.getElementById(id);
   const paramElements = app.getElementsByTagName('param');
   const paramLength = paramElements.length;
@@ -187,11 +188,7 @@ function conv(id, options){
   function userJSCallback(os_g, mode, wx, wy, emu){
     if (emu_flg === false){
       emu_flg = true;
-      for (let key in emu){
-        if ('function' === typeof emu[key]){
-          app[key] = emu[key].bind(emu);
-        }
-      }
+      setupEmulation(emu, app);
       if ('function' !== typeof userJS){
         game.__mc.options.userJSCallback = null;
         return;
@@ -199,14 +196,72 @@ function conv(id, options){
     }
     userJS(os_g, mode, wx, wy);
   }
+  function setupEmulation(emu, app){
+    const functionTable = new Map();
+    for (const key of Object.getOwnPropertyNames(emu)){
+      if ('function' === typeof emu[key]){
+        app[key] = emu[key].bind(emu);
+        functionTable.set(key.toLowerCase(), key);
+      }
+    }
+    const polys = makeJavaAppletPolyfill(emu);
+    for (const key of Object.getOwnPropertyNames(polys)){
+      app[key] = polys[key].bind(emu);
+      functionTable.set(key.toLowerCase(), key);
+    }
+    // make a new prototype
+    const protoTarget = Object.create(Object.getPrototypeOf(app));
+    const proto = new Proxy(protoTarget, {
+      get(target, name, receiver){
+        const origName = functionTable.get(name.toLowerCase());
+        if (origName){
+          app[name] = app[origName];
+          return app[origName];
+        }else{
+          return Reflect.get(target, name, receiver);
+        }
+      },
+    });
+    Object.setPrototypeOf(app, proto);
+  }
+  // Java Applet用のPolyfillも入れる
+  function makeJavaAppletPolyfill(){
+    const codeAbst = new URL(code, location.href);
+    const codeBase = codeAbst.href.replace(/\/[^\/]*$/, '/');
+    const imageCache = new Map();
+    return {
+      getDocumentBase(){
+        return location.href;
+      },
+      getCodeBase(){
+        return codeBase;
+      },
+      getImage(base, name){
+        const u = name ? new URL(name, base) : new URL(base);
+        const str = u.href;
+        const ca = imageCache.get(str);
+        if (ca != null){
+          return ca;
+        } else {
+          const img = this.newImageOnLoad(str);
+          imageCache.set(str, img);
+          return img;
+        }
+      },
+      getAudioClip(){
+        return null;
+      },
+    };
+  }
 }
     `;
-    for (let {mode, id} of targets){
+    for (let {mode, id, code} of targets){
       const ids = JSON.stringify(id);
+      const codes = JSON.stringify(code);
       if (mode !== "MasaoKani"){
-        scriptText += `  conv(${ids}, {});\n`;
+        scriptText += `  conv(${ids}, ${codes}, {});\n`;
       }else{
-        scriptText += `  conv(${ids}, {
+        scriptText += `  conv(${ids}, ${codes}, {
   extensions: [CanvasMasao.MasaoKani2],
 });\n`;
       }
