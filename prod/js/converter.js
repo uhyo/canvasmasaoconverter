@@ -117,9 +117,9 @@
       const s=document.createElement("script");
       s.dataset.cmc='cmc';
       if(mode==="2.8"){
-        s.src="http://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao_v28.js";
+        s.src="https://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao_v28.js";
       }else{
-        s.src="http://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao.js";
+        s.src="https://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao.js";
       }
       loadCount++;
       s.addEventListener("load", e=>{
@@ -133,7 +133,7 @@
       kani_loaded = true;
       const s=document.createElement("script");
       s.dataset.cmc='cmc';
-      s.src="http://Ryo-9399.github.io/mc_canvas/Outputs/MasaoKani2.js";
+      s.src="https://Ryo-9399.github.io/mc_canvas/Outputs/MasaoKani2.js";
       loadCount++;
       s.addEventListener("load", e=>{
         if(--loadCount <= 0){
