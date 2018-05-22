@@ -17,5 +17,14 @@
       "js": ["js/converter.js"],
       "run_at": "document_start"
     }
-  ]
+  ],
+
+  "permissions": [
+    "storage"
+  ],
+
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": false
+  }
 }
