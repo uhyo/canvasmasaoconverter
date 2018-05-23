@@ -7,6 +7,8 @@
     subtree: true,
   });
   // 変数
+  let options_loaded = false;
+  let lib_urls = false;
   let glb_loaded = false;
   let kani_loaded = false;
 
@@ -27,6 +29,27 @@
     }
   }, false);
 
+  // chrome.storage.syncに保存した設定項目の読み出し(非同期)
+  function loadOptions(){
+    if(options_loaded) {
+      // 既に読み込まれているならそのまま返す
+      return new Promise((resolve)=>resolve(lib_urls));
+    }
+    else {
+      const default_urls = {
+        url_fx: "https://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao.js",
+        url_kani2: "https://Ryo-9399.github.io/mc_canvas/Outputs/MasaoKani2.js",
+        url_v28: "https://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao_v28.js"
+      };
+      return new Promise((resolve) => {
+        chrome.storage.sync.get(default_urls, (items) => {
+          options_loaded = true;
+          lib_urls = items;
+          resolve(items);
+        })
+      });
+    }
+  }
 
   function mutationHandler(records){
     for (let i=0, l=records.length; i<l; i++){
@@ -85,7 +108,7 @@
       // console.log('stopping');
     }
   }
-  function convertMasaoAt(mode, a, code){
+  async function convertMasaoAt(mode, a, code){
     // aにはIDをつけてあげる
     if (stop_flg){
       return;
@@ -114,14 +137,15 @@
 
     if (!glb_loaded){
       glb_loaded = true;
+      // awaitより前にloadCountをインクリメントしないとDOMContentLoadedが呼ばれてloadCountが0のままhandleScriptLoad()が実行されてしまう
+      loadCount++;
       const s=document.createElement("script");
       s.dataset.cmc='cmc';
       if(mode==="2.8"){
-        s.src="https://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao_v28.js";
+        s.src= (await loadOptions()).url_v28;
       }else{
-        s.src="https://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao.js";
+        s.src= (await loadOptions()).url_fx;
       }
-      loadCount++;
       s.addEventListener("load", e=>{
         if(--loadCount <= 0){
           handleScriptLoad();
@@ -131,10 +155,10 @@
     }
     if (mode==='MasaoKani' && !kani_loaded){
       kani_loaded = true;
+      loadCount++;
       const s=document.createElement("script");
       s.dataset.cmc='cmc';
-      s.src="https://Ryo-9399.github.io/mc_canvas/Outputs/MasaoKani2.js";
-      loadCount++;
+      s.src= (await loadOptions()).url_kani2;
       s.addEventListener("load", e=>{
         if(--loadCount <= 0){
           handleScriptLoad();
