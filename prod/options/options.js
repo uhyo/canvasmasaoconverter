@@ -1,9 +1,9 @@
 "use strict";
 
 const default_urls = {
-  url_fx: "https://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao.js",
-  url_kani2: "https://Ryo-9399.github.io/mc_canvas/Outputs/MasaoKani2.js",
-  url_v28: "https://Ryo-9399.github.io/mc_canvas/Outputs/CanvasMasao_v28.js"
+  url_fx: "https://masao-built.uhyo.space/dist/output/master/CanvasMasao.js",
+  url_kani2: "https://masao-built.uhyo.space/dist/output/master/MasaoKani2.js",
+  url_v28: "https://masao-built.uhyo.space/dist/output/master/CanvasMasao_v28.js"
 };
 
 // save options to chrome.storage
