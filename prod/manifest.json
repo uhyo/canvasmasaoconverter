@@ -28,7 +28,8 @@
       "resources": [
         "vendor/CanvasMasao.js",
         "vendor/MasaoKani2.js",
-        "vendor/CanvasMasao_v28.js"
+        "vendor/CanvasMasao_v28.js",
+        "js/converter-script.js"
       ],
       "matches": [
         "<all_urls>"

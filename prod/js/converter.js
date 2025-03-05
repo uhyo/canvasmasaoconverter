@@ -170,123 +170,18 @@
     }
     stop_flg = true;
     console.info("Canvas Masao Converter: converting Masao");
-    // 変換スクリプトをひとつずつアレする
-    let scriptText = String.raw`(()=>{
-'use strict';
-function conv(id, code, options){
-  const app = document.getElementById(id);
-  const paramElements = app.getElementsByTagName('param');
-  const paramLength = paramElements.length;
-  const params = {}; 
-  for(let i = 0; i < paramLength; i++) {
-    const e = paramElements[i];
-    params[e.name] = e.value;
-  }
-  const div = document.createElement('div');
-  div.id = Math.random().toString(36).slice(2);
-  app.parentNode.insertBefore(div, app.nextSibling);
-
-  const opt2 = Object.assign({
-    userJSCallback,
-  }, options);
-
-  const game = new CanvasMasao.Game(params, div.id, opt2);
-
-  let emu_flg = false;
-
-  // 気の早い人のためのfake
-  app.getMode = ()=>0;
-  app.getHighscore = ()=>0;
-
-  function userJSCallback(os_g, mode, wx, wy, emu){
-    if (emu_flg === false){
-      emu_flg = true;
-      setupEmulation(emu, app);
-      if ('function' !== typeof userJS){
-        game.__mc.options.userJSCallback = null;
-        return;
-      }
-    }
-    userJS(os_g, mode, wx, wy);
-  }
-  function setupEmulation(emu, app){
-    const functionTable = new Map();
-    for (const key of Object.getOwnPropertyNames(emu)){
-      if ('function' === typeof emu[key]){
-        app[key] = emu[key].bind(emu);
-        functionTable.set(key.toLowerCase(), key);
-      }
-    }
-    const polys = makeJavaAppletPolyfill(emu);
-    for (const key of Object.getOwnPropertyNames(polys)){
-      app[key] = polys[key].bind(emu);
-      functionTable.set(key.toLowerCase(), key);
-    }
-    // make a new prototype
-    const protoTarget = Object.create(Object.getPrototypeOf(app));
-    const proto = new Proxy(protoTarget, {
-      get(target, name, receiver){
-        const origName = functionTable.get(name.toLowerCase());
-        if (origName){
-          app[name] = app[origName];
-          return app[origName];
-        }else{
-          return Reflect.get(target, name, receiver);
-        }
-      },
-    });
-    Object.setPrototypeOf(app, proto);
-  }
-  // Java Applet用のPolyfillも入れる
-  function makeJavaAppletPolyfill(){
-    const codeAbst = new URL(code, location.href);
-    const codeBase = codeAbst.href.replace(/\/[^\/]*$/, '/');
-    const imageCache = new Map();
-    return {
-      getDocumentBase(){
-        return location.href;
-      },
-      getCodeBase(){
-        return codeBase;
-      },
-      getImage(base, name){
-        const u = name ? new URL(name, base) : new URL(base);
-        const str = u.href;
-        const ca = imageCache.get(str);
-        if (ca != null){
-          return ca;
-        } else {
-          const img = this.newImageOnLoad(str);
-          imageCache.set(str, img);
-          return img;
-        }
-      },
-      getAudioClip(){
-        return null;
-      },
-    };
-  }
-}
-    `;
-    for (let {mode, id, code} of targets){
-      const ids = JSON.stringify(id);
-      const codes = JSON.stringify(code);
-      if (mode !== "MasaoKani"){
-        scriptText += `  conv(${ids}, ${codes}, {});\n`;
-      }else{
-        scriptText += `  conv(${ids}, ${codes}, {
-  extensions: [CanvasMasao.MasaoKani2],
-});\n`;
-      }
-    }
-    scriptText += `
-CanvasMasao.Game.replaceAll = ()=>{};
-CanvasMasao.Game.replace = ()=>{};
-CanvasMasao.Game.replaceByDom = ()=>{};
-  })();`;
-    const s2=document.createElement("script");
-    s2.dataset.cmc='cmc';
-    s2.textContent = scriptText;
-    (document.head||document.body).appendChild(s2);
+    
+    // Create a hidden element to pass data to the converter script
+    const dataElement = document.createElement("div");
+    dataElement.id = "canvas-masao-converter-data";
+    dataElement.style.display = "none";
+    dataElement.dataset.targets = JSON.stringify(targets);
+    (document.head || document.body).appendChild(dataElement);
+    
+    // Load the converter script
+    const s2 = document.createElement("script");
+    s2.dataset.cmc = 'cmc';
+    s2.src = chrome.runtime.getURL("js/converter-script.js");
+    (document.head || document.body).appendChild(s2);
   }
 })();
