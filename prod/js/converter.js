@@ -29,26 +29,15 @@
     }
   }, false);
 
-  // chrome.storage.syncに保存した設定項目の読み出し(非同期)
+  // Local file paths for the libraries
   function loadOptions(){
-    if(options_loaded) {
-      // 既に読み込まれているならそのまま返す
-      return new Promise((resolve)=>resolve(lib_urls));
-    }
-    else {
-      const default_urls = {
-        url_fx: "https://masao-built.uhyo.space/dist/output/master/CanvasMasao.js",
-        url_kani2: "https://masao-built.uhyo.space/dist/output/master/MasaoKani2.js",
-        url_v28: "https://masao-built.uhyo.space/dist/output/master/CanvasMasao_v28.js"
-      };
-      return new Promise((resolve) => {
-        chrome.storage.sync.get(default_urls, (items) => {
-          options_loaded = true;
-          lib_urls = items;
-          resolve(items);
-        })
-      });
-    }
+    options_loaded = true;
+    lib_urls = {
+      url_fx: chrome.runtime.getURL("vendor/CanvasMasao.js"),
+      url_kani2: chrome.runtime.getURL("vendor/MasaoKani2.js"),
+      url_v28: chrome.runtime.getURL("vendor/CanvasMasao_v28.js")
+    };
+    return Promise.resolve(lib_urls);
   }
 
   function mutationHandler(records){

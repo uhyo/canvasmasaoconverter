@@ -23,8 +23,16 @@
   "permissions": [
     "storage"
   ],
-  "options_ui": {
-    "page": "options/options.html",
-    "open_in_tab": false
-  }
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "vendor/CanvasMasao.js",
+        "vendor/MasaoKani2.js",
+        "vendor/CanvasMasao_v28.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
 }
